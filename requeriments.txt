@@ -1,0 +1,4 @@
+customtkinter
+python-docx
+Pillow
+ollama
