@@ -4,8 +4,8 @@ import os
 import subprocess
 import webbrowser
 from PIL import Image
+from utils.paths import resource_path
 
-# Importamos la lógica desde los módulos
 from modules import files_organizer, ai_writer, img_converter
 
 class InstaFilesApp(ctk.CTk):
@@ -17,7 +17,7 @@ class InstaFilesApp(ctk.CTk):
         self.geometry("950x750")
         
         try:
-            self.iconbitmap(os.path.join("assets", "icono.ico"))
+            self.iconbitmap(resource_path(os.path.join("assets", "icono.ico")))
         except:
             pass
 
@@ -41,7 +41,7 @@ class InstaFilesApp(ctk.CTk):
 
     def load_asset_image(self, filename, fixed_height=30):
         """Carga una imagen de la carpeta assets redimensionándola."""
-        path = os.path.join("assets", filename)
+        path = resource_path(os.path.join("assets", filename))
         if os.path.exists(path):
             original_img = Image.open(path)
             ratio = original_img.width / original_img.height
@@ -214,7 +214,7 @@ class InstaFilesApp(ctk.CTk):
         path = self.entry_doc_path.get()
 
         if not name or len(prompt) < 5 or not path:
-            messagebox.showwarning("Faltan datos", "Por favor rellena nombre, ruta y un prompt decente.")
+            messagebox.showwarning("Faltan datos", "Por favor rellena nombre, ruta y el prompt deseado.")
             return
 
         # 2. Bloqueo UI
