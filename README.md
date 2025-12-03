@@ -17,16 +17,16 @@ Proyecto desarrollado por Víctor José Cabrera Hurtado.
 
 ## Instalación
 
-### 1. Clonar el repositorio
+## 1. Clonar el repositorio
 
 ```bash
 git clone https://github.com/viccabhur10/InstaFiles
 cd InstaFiles
 ```
 
-### 2. Entorno virtual
+## 2. Entorno virtual
 
-## 2.1 Crear entorno virtual
+### 2.1 Crear entorno virtual
 
 ```bash
 python -m venv venv
@@ -39,26 +39,26 @@ En Linux/macOS:
 source venv/bin/activate
 ```
 
-## 2.2 Instalar dependencias del entorno virtual
+### 2.2 Instalar dependencias del entorno virtual
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Configurar IA (Ollama)
+## 3. Configurar IA (Ollama)
 Este proyecto requiere la configuración del modelo de lenguaje.
 
-## 3.1 Instalación y descarga del modelo
+### 3.1 Instalación y descarga del modelo
 Descargar e instalar Ollama de la página oficial. A continuación, abrir una terminal y ejecutar el siguiente comando para descargar el modelo:
 
 ```bash
 ollama pull llama3.2
 ```
 
-## 3.2 Verificación
+### 3.2 Verificación
 Asegurarse de que el servicio de Ollama está corriendo en segundo plano (accesible en localhost:11434).
 
-### 4. Iniciar la aplicación
+## 4. Iniciar la aplicación
 
 ```bash
 python main.py
@@ -66,13 +66,13 @@ python main.py
 
 La interfaz gráfica se abrirá inmediatamente.
 
-### 5. Generar ejecutable portatil de InstaFiles
+## 5. Generar ejecutable portatil de InstaFiles
 
 ```bash
 pyinstaller --noconfirm --onefile --windowed --icon "assets/icono.ico" --name "InstaFiles" --add-data "assets;assets" --collect-all customtkinter main.py
 ```
 
-### 6. Estructura de carpetas
+## 6. Estructura de carpetas
 - InstaFiles/: Directorio raíz del proyecto.
 
     - modules/: Contiene los diferentes módulos del proyecto.
@@ -93,7 +93,7 @@ pyinstaller --noconfirm --onefile --windowed --icon "assets/icono.ico" --name "I
 
     - main.py: Punto de entrada de la aplicación.
 
-## 6.1. Estructura de módulos
+### 6.1. Estructura de módulos
 
 - files_organizer.py: Archivo para la organización y movimiento de archivos con filtros.
 
@@ -101,14 +101,14 @@ pyinstaller --noconfirm --onefile --windowed --icon "assets/icono.ico" --name "I
 
 - img_converter.py: Motor de Conversion de imágenes basado en Pillow.
 
-## 6.2. Estructura de interfaz
+### 6.2. Estructura de interfaz
 La interfaz está construida con CustomTkinter:
 
 - main_window.py: Contiene la clase InstaFilesApp. Gestiona la creación de pestañas, widgets y la orquestación de eventos de usuario.
 
-### 7. Ejecución de tests
+## 7. Ejecución de tests
 
-## 7.1. Tests de Pytest
+### 7.1. Tests de Pytest
 Para ejecutar la batería completa de tests, ejecutar el siguiente comando en el directorio raíz:
 
 ```bash
