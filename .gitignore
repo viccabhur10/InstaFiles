@@ -1,0 +1,26 @@
+# Entornos virtuales
+venv/
+env/
+.env
+
+# Archivos compilados de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Archivos de Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Distribución y ejecutables
+dist/
+build/
+*.spec
+
+# Logs
+*.log
+
+# Carpetas del sistema
+.DS_Store
+Thumbs.db
