@@ -5,6 +5,7 @@ Las funciones que contiene actualmente son:
 - Mover archivos de unas carpetas a otras en masa, pudiendo organizarlas por nombre del fichero. 
 - Generar un .word rellenado automaticamente por Inteligencia artificial (Ollama) insertando en el mismo lugar nombre de fichero, ruta y prompt.
 - Covertidor de .jpg a diferentes extensiones de archivos.
+- Funcion para PDF: unir, extraer y encriptar.
 
 Proyecto desarrollado por Víctor José Cabrera Hurtado.
 
