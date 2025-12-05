@@ -67,9 +67,16 @@ python main.py
 La interfaz gráfica se abrirá inmediatamente.
 
 ## 5. Generar ejecutable portatil de InstaFiles
+En Windows:
 
 ```bash
 pyinstaller --noconfirm --onefile --windowed --icon "assets/icono.ico" --name "InstaFiles" --add-data "assets;assets" --collect-all customtkinter main.py
+```
+
+En Linux:
+
+```bash
+pyinstaller --noconfirm --onefile --windowed --icon "assets/icono.ico" --name "InstaFiles" --add-data "assets:assets" --collect-all customtkinter main.py
 ```
 
 ## 6. Estructura de carpetas

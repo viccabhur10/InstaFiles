@@ -6,7 +6,7 @@ import webbrowser
 from PIL import Image
 from utils.paths import resource_path
 
-from modules import files_organizer, ai_writer, img_converter
+from modules import files_organizer, ai_writer, img_converter, pdf_tools
 
 class InstaFilesApp(ctk.CTk):
     def __init__(self):
@@ -33,11 +33,14 @@ class InstaFilesApp(ctk.CTk):
         self.tab_mover = self.tabview.add("Organizador")
         self.tab_ia = self.tabview.add("Redactor IA (Ollama)")
         self.tab_img = self.tabview.add("Conversor")
+        self.tab_pdf = self.tabview.add("Herramientas PDF") 
+        
 
         # Inicializar pestañas
         self.setup_organizer_tab()
         self.setup_ai_tab()
         self.setup_converter_tab()
+        self.setup_pdf_tab()
 
     def load_asset_image(self, filename, fixed_height=30):
         """Carga una imagen de la carpeta assets redimensionándola."""
@@ -288,3 +291,144 @@ class InstaFilesApp(ctk.CTk):
                 messagebox.showinfo("Éxito", f"Imagen convertida a {target_format} correctamente.")
             except Exception as e:
                 messagebox.showerror("Error", f"Error al convertir: {str(e)}")
+
+
+# =======================================================
+    # TAB 4: HERRAMIENTAS PDF
+    # =======================================================
+    def setup_pdf_tab(self):
+        frame = self.tab_pdf
+        
+        # Sub-pestañas internas para organizar las 3 funciones PDF
+        self.pdf_tabs = ctk.CTkTabview(frame, height=400)
+        self.pdf_tabs.pack(fill="both", expand=True, padx=10, pady=10)
+        
+        tab_merge = self.pdf_tabs.add("Unir PDFs")
+        tab_extract = self.pdf_tabs.add("Extraer Páginas")
+        tab_protect = self.pdf_tabs.add("Proteger")
+        
+        # --- 1. UNIR (MERGE) ---
+        ctk.CTkLabel(tab_merge, text="Selecciona varios archivos para unirlos en uno solo:", font=("Arial", 14)).pack(pady=10)
+        
+        self.list_merge_files = ctk.CTkTextbox(tab_merge, height=100)
+        self.list_merge_files.pack(pady=5, padx=20, fill="x")
+        self.list_merge_files.insert("0.0", "Ningún archivo seleccionado...\n")
+        self.list_merge_files.configure(state="disabled")
+        
+        self.files_to_merge = [] # Lista de rutas
+        
+        btn_frame = ctk.CTkFrame(tab_merge, fg_color="transparent")
+        btn_frame.pack(pady=10)
+        ctk.CTkButton(btn_frame, text="Seleccionar PDFs (+)", command=self.select_pdfs_to_merge).pack(side="left", padx=5)
+        ctk.CTkButton(btn_frame, text="Limpiar Lista", fg_color="#E07A5F", command=self.clear_merge_list).pack(side="left", padx=5)
+        
+        ctk.CTkButton(tab_merge, text="UNIR Y GUARDAR", fg_color="#2a9d8f", height=40, font=("Arial", 14, "bold"), command=self.run_pdf_merge).pack(pady=20)
+
+        # --- 2. EXTRAER (SPLIT) ---
+        ctk.CTkLabel(tab_extract, text="Archivo PDF origen:").pack(pady=(15,5))
+        
+        extract_input_frame = ctk.CTkFrame(tab_extract, fg_color="transparent")
+        extract_input_frame.pack(fill="x", padx=20)
+        self.entry_pdf_extract_src = ctk.CTkEntry(extract_input_frame, placeholder_text="Selecciona PDF...")
+        self.entry_pdf_extract_src.pack(side="left", fill="x", expand=True)
+        ctk.CTkButton(extract_input_frame, text="📂", width=40, command=lambda: self.select_file_for_entry(self.entry_pdf_extract_src)).pack(side="left", padx=5)
+        
+        range_frame = ctk.CTkFrame(tab_extract)
+        range_frame.pack(pady=20)
+        ctk.CTkLabel(range_frame, text="Desde pág:").pack(side="left", padx=5)
+        self.entry_page_start = ctk.CTkEntry(range_frame, width=50)
+        self.entry_page_start.pack(side="left", padx=5)
+        ctk.CTkLabel(range_frame, text="Hasta pág:").pack(side="left", padx=5)
+        self.entry_page_end = ctk.CTkEntry(range_frame, width=50)
+        self.entry_page_end.pack(side="left", padx=5)
+        ctk.CTkLabel(range_frame, text="Excepto:").pack(side="left", padx=5)
+        self.except_pages = ctk.CTkEntry(range_frame, width=50)
+        self.except_pages.pack(side="left", padx=5)
+        
+        ctk.CTkButton(tab_extract, text="EXTRAER PÁGINAS", fg_color="#e9c46a", text_color="black", height=40, font=("Arial", 14, "bold"), command=self.run_pdf_extract).pack(pady=20)
+
+        # --- 3. PROTEGER (ENCRYPT) ---
+        ctk.CTkLabel(tab_protect, text="Archivo PDF a proteger:").pack(pady=(15,5))
+        protect_input_frame = ctk.CTkFrame(tab_protect, fg_color="transparent")
+        protect_input_frame.pack(fill="x", padx=20)
+        self.entry_pdf_protect_src = ctk.CTkEntry(protect_input_frame, placeholder_text="Selecciona PDF...")
+        self.entry_pdf_protect_src.pack(side="left", fill="x", expand=True)
+        ctk.CTkButton(protect_input_frame, text="📂", width=40, command=lambda: self.select_file_for_entry(self.entry_pdf_protect_src)).pack(side="left", padx=5)
+        
+        ctk.CTkLabel(tab_protect, text="Contraseña:").pack(pady=(10,5))
+        self.entry_pdf_pwd = ctk.CTkEntry(tab_protect, show="*")
+        self.entry_pdf_pwd.pack(pady=5)
+        
+        ctk.CTkButton(tab_protect, text="ENCRIPTAR PDF", fg_color="#e76f51", height=40, font=("Arial", 14, "bold"), command=self.run_pdf_protect).pack(pady=20)
+
+    # --- LÓGICA INTERNA PDF ---
+    def select_file_for_entry(self, entry_widget):
+        path = filedialog.askopenfilename(filetypes=[("PDF Files", "*.pdf")])
+        if path:
+            entry_widget.delete(0, "end")
+            entry_widget.insert(0, path)
+
+    def select_pdfs_to_merge(self):
+        files = filedialog.askopenfilenames(filetypes=[("PDF Files", "*.pdf")])
+        if files:
+            self.files_to_merge.extend(files)
+            self.update_merge_listbox()
+
+    def clear_merge_list(self):
+        self.files_to_merge = []
+        self.update_merge_listbox()
+
+    def update_merge_listbox(self):
+        self.list_merge_files.configure(state="normal")
+        self.list_merge_files.delete("1.0", "end")
+        for f in self.files_to_merge:
+            self.list_merge_files.insert("end", f"{os.path.basename(f)}\n")
+        self.list_merge_files.configure(state="disabled")
+
+    def run_pdf_merge(self):
+        if len(self.files_to_merge) < 2:
+            messagebox.showwarning("Faltan archivos", "Selecciona al menos 2 PDFs para unir.")
+            return
+            
+        save_path = filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("PDF", "*.pdf")])
+        if save_path:
+            try:
+                pdf_tools.merge_pdfs(self.files_to_merge, save_path)
+                messagebox.showinfo("Éxito", "PDFs unidos correctamente.")
+                self.clear_merge_list()
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
+
+    def run_pdf_extract(self):
+        src = self.entry_pdf_extract_src.get()
+        start = self.entry_page_start.get()
+        end = self.entry_page_end.get()
+        
+        if not src or not start.isdigit() or not end.isdigit():
+            messagebox.showwarning("Datos inválidos", "Revisa el archivo y los números de página.")
+            return
+            
+        save_path = filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("PDF", "*.pdf")])
+        if save_path:
+            try:
+                pdf_tools.extract_pages(src, save_path, int(start), int(end))
+                messagebox.showinfo("Éxito", "Páginas extraídas correctamente.")
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
+
+    def run_pdf_protect(self):
+        src = self.entry_pdf_protect_src.get()
+        pwd = self.entry_pdf_pwd.get()
+        
+        if not src or not pwd:
+            messagebox.showwarning("Faltan datos", "Selecciona archivo y escribe una contraseña.")
+            return
+
+        save_path = filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("PDF", "*.pdf")])
+        if save_path:
+            try:
+                pdf_tools.protect_pdf(src, save_path, pwd)
+                messagebox.showinfo("Éxito", "PDF protegido correctamente.")
+                self.entry_pdf_pwd.delete(0, "end")
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
